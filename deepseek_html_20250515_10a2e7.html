@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoice Generator</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 30px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            border-radius: 8px;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .form-section {
+            margin-bottom: 30px;
+        }
+        .form-row {
+            display: flex;
+            flex-wrap: wrap;
+            margin: 0 -15px;
+        }
+        .form-col {
+            flex: 1;
+            min-width: 300px;
+            padding: 0 15px;
+            margin-bottom: 20px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #555;
+        }
+        input, textarea, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+        textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+        .btn {
+            padding: 10px 20px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-right: 10px;
+            transition: background 0.3s;
+        }
+        .btn:hover {
+            background: #45a049;
+        }
+        .btn-secondary {
+            background: #2196F3;
+        }
+        .btn-secondary:hover {
+            background: #0b7dda;
+        }
+        .btn-danger {
+            background: #f44336;
+        }
+        .btn-danger:hover {
+            background: #da190b;
+        }
+        .btn-group {
+            margin: 20px 0;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .invoice-preview {
+            display: none;
+            margin-top: 30px;
+            border: 1px solid #ddd;
+            padding: 30px;
+            background: white;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 30px;
+        }
+        .company-info, .invoice-info {
+            flex: 1;
+        }
+        .client-info {
+            margin-bottom: 30px;
+        }
+        .totals {
+            margin-left: auto;
+            width: 300px;
+        }
+        .notes-terms {
+            margin-top: 40px;
+        }
+        @media print {
+            .no-print {
+                display: none;
+            }
+            body, .container {
+                padding: 0;
+                margin: 0;
+                background: white;
+                box-shadow: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Invoice Generator</h1>
+        
+        <div class="form-section" id="formSection">
+            <div class="form-row">
+                <div class="form-col">
+                    <h2>Your Company Information</h2>
+                    <div class="form-group">
+                        <label for="companyName">Company Name</label>
+                        <input type="text" id="companyName" value="BACHOLOR H-FLATE">
+                    </div>
+                    <div class="form-group">
+                        <label for="companyAddress">Address</label>
+                        <textarea id="companyAddress">HOUSE-68\nMirpur-02,Dhaka.\n1216\nBangladesh</textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="companyPhone">Phone Number</label>
+                        <input type="text" id="companyPhone" value="1837569796">
+                    </div>
+                </div>
+                
+                <div class="form-col">
+                    <h2>Client Information</h2>
+                    <div class="form-group">
+                        <label for="clientName">Client Name(s)</label>
+                        <input type="text" id="clientName" value="Rifat,Shourob,Nazmul">
+                    </div>
+                    <div class="form-group">
+                        <label for="clientAddress">Client Address</label>
+                        <textarea id="clientAddress">HOUSE-68\nMirpur,Dhaka\n1216\nBangladesh</textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="clientPhone">Client Phone</label>
+                        <input type="text" id="clientPhone" value="1815172477">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-col">
+                    <h2>Invoice Details</h2>
+                    <div class="form-group">
+                        <label for="invoiceNumber">Invoice Number</label>
+                        <input type="text" id="invoiceNumber" value="INV-2025-06-10">
+                    </div>
+                    <div class="form-group">
+                        <label for="dateIssued">Date Issued</label>
+                        <input type="date" id="dateIssued" value="2025-10-06">
+                    </div>
+                </div>
+                
+                <div class="form-col">
+                    <h2>Payment Details</h2>
+                    <div class="form-group">
+                        <label for="dueDate">Due Date</label>
+                        <input type="date" id="dueDate" value="2025-10-06">
+                    </div>
+                    <div class="form-group">
+                        <label for="taxRate">Tax Rate (%)</label>
+                        <input type="number" id="taxRate" value="0" min="0" max="100">
+                    </div>
+                    <div class="form-group">
+                        <label for="discount">Discount Amount</label>
+                        <input type="number" id="discount" value="0" min="0">
+                    </div>
+                </div>
+            </div>
+            
+            <h2>Invoice Items</h2>
+            <table id="itemsTable">
+                <thead>
+                    <tr>
+                        <th width="40%">Description</th>
+                        <th width="20%">Rate</th>
+                        <th width="15%">Qty</th>
+                        <th width="20%">Amount</th>
+                        <th width="5%">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><input type="text" class="item-desc" value="Rent"></td>
+                        <td><input type="number" class="item-rate" value="10600" step="0.01"></td>
+                        <td><input type="number" class="item-qty" value="1" step="1"></td>
+                        <td class="item-amount">10600.00</td>
+                        <td><button class="btn btn-danger remove-item">×</button></td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <div class="btn-group">
+                <button class="btn" id="addItem">Add Item</button>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-col">
+                    <div class="form-group">
+                        <label for="notes">Notes</label>
+                        <textarea id="notes">Thank you for your business!</textarea>
+                    </div>
+                </div>
+                <div class="form-col">
+                    <div class="form-group">
+                        <label for="terms">Terms & Conditions</label>
+                        <textarea id="terms">Please pay within 02 days using the link in your invoice notice</textarea>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="btn-group">
+                <button class="btn" id="generateInvoice">Generate Invoice</button>
+                <button class="btn btn-secondary" id="clearForm">Clear Form</button>
+            </div>
+        </div>
+        
+        <div class="invoice-preview" id="invoicePreview">
+            <div class="header">
+                <div class="company-info">
+                    <h2 id="previewCompanyName">BACHOLOR H-FLATE</h2>
+                    <p id="previewCompanyAddress" style="white-space: pre-line;">HOUSE-68
+Mirpur-02,Dhaka.
+1216
+Bangladesh</p>
+                    <p id="previewCompanyPhone">Phone: 1837569796</p>
+                </div>
+                <div class="invoice-info">
+                    <h1>INVOICE</h1>
+                    <p><strong>Date Issued:</strong> <span id="previewDateIssued">2025-10-06</span></p>
+                    <p><strong>Invoice #:</strong> <span id="previewInvoiceNumber">INV-2025-06-10</span></p>
+                    <p><strong>Due Date:</strong> <span id="previewDueDate">2025-10-06</span></p>
+                </div>
+            </div>
+            
+            <div class="client-info">
+                <h3>Billed To:</h3>
+                <p id="previewClientName">Rifat,Shourob,Nazmul</p>
+                <p id="previewClientAddress" style="white-space: pre-line;">HOUSE-68
+Mirpur,Dhaka
+1216
+Bangladesh</p>
+                <p id="previewClientPhone">Phone: 1815172477</p>
+            </div>
+            
+            <table id="previewItemsTable">
+                <thead>
+                    <tr>
+                        <th>DESCRIPTION</th>
+                        <th>RATE</th>
+                        <th>QTY</th>
+                        <th>AMOUNT</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Rent</td>
+                        <td>10,600.00</td>
+                        <td>1</td>
+                        <td>10,600.00</td>
+                    </tr>
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="3" class="text-right">Subtotal</td>
+                        <td id="subtotal">10,600.00</td>
+                    </tr>
+                    <tr>
+                        <td colspan="3" class="text-right">Discount</td>
+                        <td id="previewDiscount">0.00</td>
+                    </tr>
+                    <tr>
+                        <td colspan="3" class="text-right">Tax (<span id="taxRateDisplay">0</span>%)</td>
+                        <td id="tax">0.00</td>
+                    </tr>
+                    <tr class="total-row">
+                        <td colspan="3" class="text-right"><strong>TOTAL</strong></td>
+                        <td id="total"><strong>10,600.00</strong></td>
+                    </tr>
+                </tfoot>
+            </table>
+            
+            <div class="notes-terms">
+                <div class="form-row">
+                    <div class="form-col">
+                        <p><strong>Notes:</strong></p>
+                        <p id="previewNotes">Thank you for your business!</p>
+                    </div>
+                    <div class="form-col">
+                        <p><strong>Terms & Conditions:</strong></p>
+                        <p id="previewTerms">Please pay within 02 days using the link in your invoice notice</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="btn-group no-print">
+                <button class="btn" id="printInvoice">Print Invoice</button>
+                <button class="btn btn-secondary" id="exportPdf">Export to PDF</button>
+                <button class="btn btn-danger" id="backToForm">Back to Form</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize jsPDF
+            const { jsPDF } = window.jspdf;
+            
+            // Format currency
+            function formatCurrency(amount) {
+                return parseFloat(amount).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
+            }
+            
+            // Calculate amounts for a row
+            function calculateRowAmount(row) {
+                const rate = parseFloat(row.querySelector('.item-rate').value) || 0;
+                const qty = parseFloat(row.querySelector('.item-qty').value) || 0;
+                const amount = rate * qty;
+                row.querySelector('.item-amount').textContent = formatCurrency(amount);
+                return amount;
+            }
+            
+            // Calculate all totals
+            function calculateTotals() {
+                let subtotal = 0;
+                
+                // Calculate line items
+                document.querySelectorAll('#itemsTable tbody tr').forEach(row => {
+                    subtotal += calculateRowAmount(row);
+                });
+                
+                // Calculate tax and discount
+                const taxRate = parseFloat(document.getElementById('taxRate').value) || 0;
+                const discount = parseFloat(document.getElementById('discount').value) || 0;
+                const tax = subtotal * (taxRate / 100);
+                const total = subtotal - discount + tax;
+                
+                // Update preview
+                document.getElementById('subtotal').textContent = formatCurrency(subtotal);
+                document.getElementById('previewDiscount').textContent = formatCurrency(discount);
+                document.getElementById('tax').textContent = formatCurrency(tax);
+                document.getElementById('taxRateDisplay').textContent = taxRate;
+                document.getElementById('total').textContent = formatCurrency(total);
+                document.getElementById('previewAmountDue').textContent = formatCurrency(total);
+            }
+            
+            // Add item row
+            document.getElementById('addItem').addEventListener('click', function() {
+                const tbody = document.querySelector('#itemsTable tbody');
+                const newRow = document.createElement('tr');
+                newRow.innerHTML = `
+                    <td><input type="text" class="item-desc" placeholder="Item description"></td>
+                    <td><input type="number" class="item-rate" value="0" step="0.01"></td>
+                    <td><input type="number" class="item-qty" value="0" step="1"></td>
+                    <td class="item-amount">0.00</td>
+                    <td><button class="btn btn-danger remove-item">×</button></td>
+                `;
+                tbody.appendChild(newRow);
+                
+                // Add event listeners to new row
+                addItemRowListeners(newRow);
+            });
+            
+            // Remove item row
+            document.addEventListener('click', function(e) {
+                if (e.target.classList.contains('remove-item')) {
+                    e.target.closest('tr').remove();
+                    calculateTotals();
+                }
+            });
+            
+            // Add listeners to input fields
+            function addItemRowListeners(row) {
+                row.querySelector('.item-rate').addEventListener('input', function() {
+                    calculateRowAmount(row);
+                    calculateTotals();
+                });
+                
+                row.querySelector('.item-qty').addEventListener('input', function() {
+                    calculateRowAmount(row);
+                    calculateTotals();
+                });
+            }
+            
+            // Initialize existing rows
+            document.querySelectorAll('#itemsTable tbody tr').forEach(row => {
+                addItemRowListeners(row);
+            });
+            
+            // Calculate initial totals
+            calculateTotals();
+            
+            // Watch for changes to tax and discount
+            document.getElementById('taxRate
